@@ -1,5 +1,7 @@
 package com.basitbhatti.todoproject.presentation.ui.screens
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -20,13 +22,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,23 +52,41 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.basitbhatti.todoproject.R
+import com.basitbhatti.todoproject.utils.MORNING_PERSON
+import com.basitbhatti.todoproject.utils.NIGHT_PERSON
+import com.basitbhatti.todoproject.utils.PERSON_TYPE
+import com.basitbhatti.todoproject.utils.REMINDER_HOUR
+import com.basitbhatti.todoproject.utils.REMINDER_MINUTE
+import com.pdftoexcel.bankstatementconverter.utils.PrefManager
 
 @Composable
 fun PersonTypeScreen(
-    modifier: Modifier = Modifier, onButtonClick: () -> Unit
+    modifier: Modifier = Modifier, context: Context, onButtonClick: () -> Unit
 ) {
 
-    val options = listOf(
-        "8 PM", "10 PM", "Select Time"
-    )
+    val prefManager = PrefManager(context)
+
+    var showTimePickerDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var options by remember {
+        mutableStateOf(
+            listOf("8 PM", "10 PM", "Select Time")
+        )
+    }
 
     var selectedOption by remember {
         mutableStateOf(options[0])
     }
 
-    val optionsNight = listOf(
-        "3 PM", "5 PM", "Select Time"
-    )
+    var optionsNight by remember {
+        mutableStateOf(
+            listOf("3 PM", "5 PM", "Select Time")
+
+        )
+    }
+
 
     var selectedOptionNight by remember {
         mutableStateOf(optionsNight[0])
@@ -125,6 +151,7 @@ fun PersonTypeScreen(
                         Checkbox(checked = isMorningPersonChecked, onCheckedChange = {
                             isMorningPersonChecked = it
                             if (it) {
+                                prefManager.setString(PERSON_TYPE, MORNING_PERSON)
                                 isNightPersonChecked = false
                             }
                         })
@@ -191,6 +218,9 @@ fun PersonTypeScreen(
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 RadioButton(selected = selectedOption == options[0], onClick = {
+                                    showTimePickerDialog = false
+                                    prefManager.setInt(REMINDER_HOUR, 20)
+                                    prefManager.setInt(REMINDER_MINUTE, 0)
                                     selectedOption = options[0]
                                 })
                                 Text(text = options[0])
@@ -201,6 +231,9 @@ fun PersonTypeScreen(
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 RadioButton(selected = selectedOption == options[1], onClick = {
+                                    prefManager.setInt(REMINDER_HOUR, 22)
+                                    prefManager.setInt(REMINDER_MINUTE, 0)
+                                    showTimePickerDialog = false
                                     selectedOption = options[1]
                                 })
                                 Text(text = options[1])
@@ -210,17 +243,20 @@ fun PersonTypeScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
+
                                 RadioButton(selected = selectedOption == options[2], onClick = {
+                                    showTimePickerDialog = true
                                     selectedOption = options[2]
                                 })
+
+
+
                                 Text(text = options[2])
                             }
 
                         }
                     }
-
                 }
-
             }
 
             Column(
@@ -228,7 +264,6 @@ fun PersonTypeScreen(
                     .fillMaxWidth()
                     .padding(top = 15.dp)
             ) {
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -238,17 +273,16 @@ fun PersonTypeScreen(
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color.LightGray),
                 ) {
-
                     Box(
                         modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center
                     ) {
                         Checkbox(checked = isNightPersonChecked, onCheckedChange = {
                             isNightPersonChecked = it
                             if (it) {
+                                prefManager.setString(PERSON_TYPE, NIGHT_PERSON)
                                 isMorningPersonChecked = false
                             }
                         })
-
                     }
 
                     Column(
@@ -256,7 +290,6 @@ fun PersonTypeScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
                         Text(
                             text = "Night Person",
                             color = MaterialTheme.colorScheme.onBackground,
@@ -315,6 +348,9 @@ fun PersonTypeScreen(
                                 RadioButton(
                                     selected = selectedOptionNight == optionsNight[0],
                                     onClick = {
+                                        showTimePickerDialog = false
+                                        prefManager.setInt(REMINDER_HOUR, 15)
+                                        prefManager.setInt(REMINDER_MINUTE, 0)
                                         selectedOptionNight = optionsNight[0]
                                     })
                                 Text(text = optionsNight[0])
@@ -327,6 +363,10 @@ fun PersonTypeScreen(
                                 RadioButton(
                                     selected = selectedOptionNight == optionsNight[1],
                                     onClick = {
+                                        showTimePickerDialog = false
+
+                                        prefManager.setInt(REMINDER_HOUR, 17)
+                                        prefManager.setInt(REMINDER_MINUTE, 0)
                                         selectedOptionNight = optionsNight[1]
                                     })
                                 Text(text = optionsNight[1])
@@ -339,8 +379,19 @@ fun PersonTypeScreen(
                                 RadioButton(
                                     selected = selectedOptionNight == optionsNight[2],
                                     onClick = {
+                                        showTimePickerDialog = true
                                         selectedOptionNight = optionsNight[2]
                                     })
+
+//                                ShowTimePicker(context = context,
+//                                    showDialog = showTimePickerDialog,
+//                                    onDismiss = { showTimePickerDialog = false }) { hour, minute ->
+//                                    showTimePickerDialog = false
+//
+//                                    Log.d("TAGTIMEPICKER", "hour $hour & min $minute")
+//                                    prefManager.setInt(REMINDER_HOUR, hour)
+//                                    prefManager.setInt(REMINDER_MINUTE, minute)
+//                                }
                                 Text(text = optionsNight[2])
                             }
 
@@ -368,13 +419,84 @@ fun PersonTypeScreen(
             Text(text = "Continue")
         }
 
+        if (showTimePickerDialog) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                ShowTimePicker(context, showTimePickerDialog, onDismiss = {
+                    showTimePickerDialog = false
+                }) { hour, minute ->
+                    showTimePickerDialog = false
+
+                    options = options.toMutableList().also { it[2] = "$hour:$minute" }
+                    optionsNight = options.toMutableList().also { it[2] = "$hour:$minute" }
+                    selectedOption = options[2]
+                    selectedOptionNight = options[2]
+                    Log.d("TAGTIMEPICKER", "hour $hour & min $minute")
+                    prefManager.setInt(REMINDER_HOUR, hour)
+                    prefManager.setInt(REMINDER_MINUTE, minute)
+                }
+            }
+        }
+
+
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowTimePicker(
+    context: Context, showDialog: Boolean, onDismiss: () -> Unit, onTimeChanged: (Int, Int) -> Unit
+) {
+    val timePickerState = rememberTimePickerState(is24Hour = true)
+
+
+    if (showDialog) {
+
+        Card {
+            Column(
+                modifier = Modifier
+                    .width(300.dp)
+                    .padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TimePicker(state = timePickerState)
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 15.dp, end = 15.dp)
+                ) {
+                    Button(
+                        onClick = { onDismiss() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Spacer(Modifier.width(10.dp))
+
+                    Button(
+                        onClick = { onTimeChanged(timePickerState.hour, timePickerState.minute) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("OK")
+                    }
+                }
+            }
+
+        }
+
+
+    }
 
 }
 
 @Preview
 @Composable
 private fun Preview() {
-    PersonTypeScreen(onButtonClick = {})
+    PersonTypeScreen(context = LocalContext.current, onButtonClick = {})
 }
