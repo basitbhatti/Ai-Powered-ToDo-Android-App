@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.basitbhatti.todoproject.presentation.theme.ToDoProjectCollaborationTheme
+import com.basitbhatti.todoproject.presentation.ui.screens.HomeScreen
 import com.basitbhatti.todoproject.presentation.ui.screens.PersonTypeScreen
 
 class MainActivity : ComponentActivity() {
@@ -13,9 +14,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ToDoProjectCollaborationTheme {
-                PersonTypeScreen(context = this@MainActivity, onButtonClick = {
-                    
-                })
+//                PersonTypeScreen(context = this@MainActivity, onButtonClick = {
+//
+//                })
+                HomeScreen()
             }
         }
     }
