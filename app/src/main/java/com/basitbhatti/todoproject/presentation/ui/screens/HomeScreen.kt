@@ -36,7 +36,7 @@ import com.basitbhatti.todoproject.presentation.theme.primaryContainer
 import java.time.LocalDate
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen() {
 
     var selectedDate by remember {
         mutableStateOf(LocalDate.now())
@@ -45,6 +45,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 30.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
 
@@ -81,7 +82,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         .background(primaryContainer)
                         .dashedBorder(
                             width = 2.dp,
-                            color = Color.Gray,
+                            color = Color.LightGray,
                             shape = MaterialTheme.shapes.medium,
                             on = 4.dp,
                             off = 4.dp
@@ -102,9 +103,13 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         fontSize = 16.sp,
                         color = GrayishColor
                     )
-
-
                 }
+
+
+
+
+
+
 
 
             }
