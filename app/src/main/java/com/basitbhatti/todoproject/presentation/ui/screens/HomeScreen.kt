@@ -25,18 +25,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.basitbhatti.todoproject.presentation.components.HorizontalCalendar
 import com.basitbhatti.todoproject.presentation.components.dashedBorder
+import com.basitbhatti.todoproject.presentation.navigation.Screen
 import com.basitbhatti.todoproject.presentation.theme.GrayishColor
 import com.basitbhatti.todoproject.presentation.theme.primaryContainer
+import com.basitbhatti.todoproject.presentation.viewmodel.TaskViewModel
+import com.basitbhatti.todoproject.utils.PERSON_TYPE
+import com.pdftoexcel.bankstatementconverter.utils.PrefManager
 import java.time.LocalDate
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: TaskViewModel = hiltViewModel(),
+    controller: NavHostController
+) {
+
+    val context = LocalContext.current
+    val prefManager = PrefManager(context)
+    if (prefManager.getString(PERSON_TYPE).isBlank()) {
+        controller.navigate(Screen.UserType.route) {
+            popUpTo(Screen.Home.route) {
+                inclusive = true
+            }
+        }
+    }
 
     var selectedDate by remember {
         mutableStateOf(LocalDate.now())
@@ -88,7 +109,6 @@ fun HomeScreen() {
                             off = 4.dp
                         ), verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Image(
                         imageVector = Icons.Filled.AddCircle,
                         contentDescription = "add",
@@ -104,25 +124,14 @@ fun HomeScreen() {
                         color = GrayishColor
                     )
                 }
-
-
-
-
-
-
-
-
             }
         }
-
-
     }
-
 
 }
 
 @Preview
 @Composable
 private fun HomePrev() {
-    HomeScreen()
+    HomeScreen(controller = rememberNavController())
 }

@@ -1,4 +1,4 @@
-package com.basitbhatti.todoproject.domain.viewmodel
+package com.basitbhatti.todoproject.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -60,7 +60,7 @@ import com.basitbhatti.todoproject.utils.REMINDER_MINUTE
 import com.pdftoexcel.bankstatementconverter.utils.PrefManager
 
 @Composable
-fun PersonTypeScreen(
+fun UserTypeScreen(
     modifier: Modifier = Modifier, context: Context, onButtonClick: () -> Unit
 ) {
 
@@ -86,7 +86,6 @@ fun PersonTypeScreen(
 
         )
     }
-
 
     var selectedOptionNight by remember {
         mutableStateOf(optionsNight[0])
@@ -498,5 +497,5 @@ fun ShowTimePicker(
 @Preview
 @Composable
 private fun Preview() {
-    PersonTypeScreen(context = LocalContext.current, onButtonClick = {})
+    UserTypeScreen(context = LocalContext.current, onButtonClick = {})
 }
