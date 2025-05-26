@@ -3,6 +3,8 @@ package com.basitbhatti.todoproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.navigation.compose.rememberNavController
+import com.basitbhatti.todoproject.presentation.navigation.NavGraph
 import com.basitbhatti.todoproject.presentation.theme.ToDoProjectCollaborationTheme
 import com.basitbhatti.todoproject.presentation.ui.screens.HomeScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,7 +17,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ToDoProjectCollaborationTheme {
-
+                NavGraph(this@MainActivity, rememberNavController())
             }
         }
     }

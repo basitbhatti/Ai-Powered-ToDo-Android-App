@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -19,11 +20,13 @@ val AppFontFamily = FontFamily(
 
 
 private val DarkColorScheme = darkColorScheme(
+    background = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
 
-    primaryContainer = primaryContainer
+    primaryContainer = primaryContainer,
+    background = Color.White
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

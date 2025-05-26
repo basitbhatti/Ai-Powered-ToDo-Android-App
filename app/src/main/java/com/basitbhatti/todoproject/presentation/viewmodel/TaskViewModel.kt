@@ -20,10 +20,10 @@ class TaskViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     private val deleteTaskRepository: DeleteTaskUseCase,
     private val editTaskUseCase: EditTaskUseCase,
-) : ViewModel() {
+) : ViewModel(), TaskViewModelContract {
 
     private var _tasks = MutableStateFlow<List<TaskItemEntity>>(emptyList())
-    val tasks = _tasks.asStateFlow()
+    override val tasks = _tasks.asStateFlow()
 
 
     init {
@@ -41,18 +41,23 @@ class TaskViewModel @Inject constructor(
     fun addTask(task: TaskItemEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             addTaskUseCase(task)
+            fetchAllTasks()
         }
     }
 
     fun updateTask(task: TaskItemEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             editTaskUseCase(task)
+            fetchAllTasks()
+
         }
     }
 
     fun deleteTask(task: TaskItemEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             deleteTaskRepository(task)
+            fetchAllTasks()
+
         }
     }
 

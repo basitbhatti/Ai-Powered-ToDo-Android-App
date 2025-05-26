@@ -45,6 +45,14 @@ fun HorizontalCalendar(
     selectedColor: Color = MaterialTheme.colorScheme.secondary,
     defaultColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
+
+//        HorizontalCalendar(
+//            modifier = Modifier.padding(horizontal = 10.dp),
+//            selectedDate = selectedDate,
+//            onDateSelected = { selectedDate = it },
+//            daysToShow = 7
+//        )
+
     val dates = remember(startDate, daysToShow) {
         List(daysToShow) { index ->
             startDate.plusDays(index.toLong())
