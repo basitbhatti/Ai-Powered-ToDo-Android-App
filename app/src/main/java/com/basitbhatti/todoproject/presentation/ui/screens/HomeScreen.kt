@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,7 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,8 +52,8 @@ import com.basitbhatti.todoproject.domain.model.TaskItemEntity
 import com.basitbhatti.todoproject.presentation.components.dashedBorder
 import com.basitbhatti.todoproject.presentation.navigation.Screen
 import com.basitbhatti.todoproject.presentation.theme.GrayishColor
+import com.basitbhatti.todoproject.presentation.theme.lighterGray
 import com.basitbhatti.todoproject.presentation.theme.primaryContainer
-import com.basitbhatti.todoproject.presentation.viewmodel.FakeTaskViewModel
 import com.basitbhatti.todoproject.presentation.viewmodel.TaskViewModel
 import com.basitbhatti.todoproject.utils.PERSON_TYPE
 import com.pdftoexcel.bankstatementconverter.utils.PrefManager
@@ -185,7 +188,11 @@ fun AddTaskBottomSheet(
     onTaskAdded: (TaskItemEntity) -> Unit,
 ) {
 
-    val sheetState = rememberModalBottomSheetState()
+    var isTodaySelected by remember {
+        mutableStateOf(true)
+    }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val scope = rememberCoroutineScope()
 
     var title by remember {
@@ -196,8 +203,8 @@ fun AddTaskBottomSheet(
         mutableStateOf("")
     }
 
-
     ModalBottomSheet(
+        modifier = Modifier.fillMaxHeight(0.7f),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = Color.White,
@@ -214,7 +221,7 @@ fun AddTaskBottomSheet(
                 Text(
                     modifier = Modifier.padding(start = 10.dp),
                     text = "Add New Task",
-                    fontSize = 24.sp,
+                    fontSize = 22.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Medium
                 )
@@ -249,7 +256,8 @@ fun AddTaskBottomSheet(
                 },
                 placeholder = {
                     Text("Title")
-                }, colors = TextFieldDefaults.colors(
+                },
+                colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.LightGray,
@@ -264,42 +272,352 @@ fun AddTaskBottomSheet(
                     .height(120.dp)
                     .padding(start = 15.dp, top = 15.dp, end = 15.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFF8F8F8))
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    value = description,
-                    onValueChange = {
-                        description = it
-                    },
-                    placeholder = {
-                        Text("Short Description", fontSize = 12.sp, fontWeight = FontWeight.Light, color = Color.Gray)
-                    }, colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                    .background(lighterGray)
+            )
+            {
+                TextField(modifier = Modifier.fillMaxWidth(), value = description, onValueChange = {
+                    description = it
+                }, placeholder = {
+                    Text(
+                        "Short Description (Optional)",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Light,
+                        color = Color.Gray
                     )
+                }, colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
                 )
             }
-            Box (
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                    .height(40.dp)
             ) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(0.5f)
+                        .padding(end = 7.5.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (isTodaySelected) {
+                                Color.LightGray
+                            } else {
+                                lighterGray
+                            }
+                        )
+                        .clickable {
+                            isTodaySelected = true
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .size(25.dp),
+                        colorFilter = ColorFilter.tint(
+                            if (isTodaySelected) {
+                                Color.Black
+                            } else {
+                                Color.Gray
+                            }
+                        ),
+                        imageVector = Icons.Rounded.Schedule,
+                        contentDescription = "Today",
+                    )
+
+                    Text(
+                        "Today", color = if (isTodaySelected) {
+                            Color.Black
+                        } else {
+                            Color.Gray
+                        }, modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(0.5f)
+                        .padding(start = 7.5.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (!isTodaySelected) {
+                                Color.LightGray
+                            } else {
+                                lighterGray
+                            }
+                        )
+                        .clickable {
+                            isTodaySelected = false
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .size(25.dp),
+                        colorFilter = ColorFilter.tint(
+                            if (!isTodaySelected) {
+                                Color.Black
+                            } else {
+                                Color.Gray
+                            }
+                        ),
+                        imageVector = Icons.Rounded.Schedule,
+                        contentDescription = "Tomorrow",
+                    )
+
+                    Text(
+                        "Tomorrow", color = if (!isTodaySelected) {
+                            Color.Black
+                        } else {
+                            Color.Gray
+                        }, modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
             }
 
-
+            Button(enabled = title.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 40.dp, end = 40.dp, top = 15.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Gray, disabledContainerColor = Color.LightGray
+                ),
+                onClick = {}) {
+                Text(text = "Save", color = Color.Black)
+            }
         }
-
     }
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun HomePrev() {
-    val fakeViewModel = remember {
-        FakeTaskViewModel()
+
+    var isTodaySelected by remember {
+        mutableStateOf(true)
     }
+
+    //---NEW ABOVE
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val scope = rememberCoroutineScope()
+
+    var title by remember {
+        mutableStateOf("")
+    }
+
+    var description by remember {
+        mutableStateOf("")
+    }
+
+    Column(
+        modifier = Modifier.background(MaterialTheme.colorScheme.background)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(start = 10.dp),
+                text = "Add New Task",
+                fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Medium
+            )
+
+            IconButton(onClick = {
+                scope.launch {
+                    sheetState.hide()
+                    if (!sheetState.isVisible) {
+
+                    }
+                }
+            }) {
+                Image(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(end = 10.dp),
+                    imageVector = Icons.Rounded.Close,
+                    colorFilter = ColorFilter.tint(Color.Gray),
+                    contentDescription = "Close Bottom Dialog"
+                )
+            }
+        }
+
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp),
+            value = title,
+            singleLine = true,
+            onValueChange = {
+                title = it
+            },
+            placeholder = {
+                Text("Title")
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.LightGray,
+                unfocusedIndicatorColor = Color.LightGray
+            )
+        )
+
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(start = 15.dp, top = 15.dp, end = 15.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(lighterGray)
+        )
+        {
+            TextField(modifier = Modifier.fillMaxWidth(), value = description, onValueChange = {
+                description = it
+            }, placeholder = {
+                Text(
+                    "Short Description (Optional)",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Light,
+                    color = Color.Gray
+                )
+            }, colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                .height(40.dp)
+        ) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(0.5f)
+                    .padding(end = 7.5.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(
+                        if (isTodaySelected) {
+                            Color.LightGray
+                        } else {
+                            lighterGray
+                        }
+                    )
+                    .clickable {
+                        isTodaySelected = true
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Image(
+                    modifier = Modifier
+                        .padding(end = 5.dp)
+                        .size(25.dp),
+                    colorFilter = ColorFilter.tint(
+                        if (isTodaySelected) {
+                            Color.Black
+                        } else {
+                            Color.Gray
+                        }
+                    ),
+                    imageVector = Icons.Rounded.Schedule,
+                    contentDescription = "Today",
+                )
+
+                Text(
+                    "Today", color = if (isTodaySelected) {
+                        Color.Black
+                    } else {
+                        Color.Gray
+                    }, modifier = Modifier.padding(start = 5.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(0.5f)
+                    .padding(start = 7.5.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(
+                        if (!isTodaySelected) {
+                            Color.LightGray
+                        } else {
+                            lighterGray
+                        }
+                    )
+                    .clickable {
+                        isTodaySelected = false
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Image(
+                    modifier = Modifier
+                        .padding(end = 5.dp)
+                        .size(25.dp),
+                    colorFilter = ColorFilter.tint(
+                        if (!isTodaySelected) {
+                            Color.Black
+                        } else {
+                            Color.Gray
+                        }
+                    ),
+                    imageVector = Icons.Rounded.Schedule,
+                    contentDescription = "Schedule",
+                )
+
+                Text(
+                    "Schedule", color = if (!isTodaySelected) {
+                        Color.Black
+                    } else {
+                        Color.Gray
+                    }, modifier = Modifier.padding(start = 5.dp)
+                )
+            }
+
+        }
+
+        Button(enabled = title.isNotBlank(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 40.dp, end = 40.dp, top = 15.dp)
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Gray, disabledContainerColor = Color.LightGray
+            ),
+            onClick = {}) {
+            Text(text = "Save", color = Color.Black)
+        }
+
+
+    }
+
+
 }
