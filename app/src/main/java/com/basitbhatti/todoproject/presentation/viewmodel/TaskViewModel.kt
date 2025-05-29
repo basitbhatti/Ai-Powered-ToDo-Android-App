@@ -1,5 +1,6 @@
 package com.basitbhatti.todoproject.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.basitbhatti.todoproject.domain.model.TaskItemEntity
@@ -34,11 +35,15 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             getAllTasksUseCase().collect {
                 _tasks.value = it
+                it.forEach {
+                    Log.d("TAGTASK", "fetching : ${it.title}")
+                }
             }
         }
     }
 
     fun addTask(task: TaskItemEntity) {
+        Log.d("TAGTASK", "addTask: ")
         viewModelScope.launch(Dispatchers.IO) {
             addTaskUseCase(task)
             fetchAllTasks()
