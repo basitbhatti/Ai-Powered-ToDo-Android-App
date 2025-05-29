@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,7 +99,7 @@ fun HomeScreen(
             AddTaskBottomSheet(onDismiss = {
                 showAddTaskSheet = false
             }, onTaskAdded = { item ->
-
+                viewModel.addTask(item)
             })
         }
     }
@@ -125,7 +126,11 @@ fun HomeScreen(
                 .clip(RoundedCornerShape(12.dp))
                 .background(primaryContainer)
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 300.dp)
+            ) {
 
                 Row(
                     modifier = Modifier
@@ -159,7 +164,10 @@ fun HomeScreen(
                     )
                 }
 
-                if (tasks.value.isEmpty()) {
+                if (tasks.value.isNotEmpty()) {
+
+
+                } else {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -180,6 +188,14 @@ fun HomeScreen(
     }
 
 }
+
+
+@Composable
+fun TaskItem(item: TaskItemEntity) {
+
+}
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -265,7 +281,6 @@ fun AddTaskBottomSheet(
                 )
             )
 
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -273,8 +288,7 @@ fun AddTaskBottomSheet(
                     .padding(start = 15.dp, top = 15.dp, end = 15.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(lighterGray)
-            )
-            {
+            ) {
                 TextField(modifier = Modifier.fillMaxWidth(), value = description, onValueChange = {
                     description = it
                 }, placeholder = {
@@ -396,7 +410,21 @@ fun AddTaskBottomSheet(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Gray, disabledContainerColor = Color.LightGray
                 ),
-                onClick = {}) {
+                onClick = {
+                    val task = TaskItemEntity(
+                        id = 0,
+                        title = title,
+                        description = description,
+                        dueDay = if (isTodaySelected) {
+                            LocalDate.now()
+                        } else {
+                            LocalDate.now().plusDays(1)
+                        },
+                        isCompleted = false,
+                        priority = 1
+                    )
+                    onTaskAdded(task)
+                }) {
                 Text(text = "Save", color = Color.Black)
             }
         }
@@ -488,8 +516,7 @@ private fun HomePrev() {
                 .padding(start = 15.dp, top = 15.dp, end = 15.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(lighterGray)
-        )
-        {
+        ) {
             TextField(modifier = Modifier.fillMaxWidth(), value = description, onValueChange = {
                 description = it
             }, placeholder = {
