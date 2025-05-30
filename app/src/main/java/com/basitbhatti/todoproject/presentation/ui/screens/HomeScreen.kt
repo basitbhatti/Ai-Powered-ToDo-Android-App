@@ -90,7 +90,7 @@ fun HomeScreen(
         }
     }
 
-    val tasks = viewModel.tasks.collectAsState()
+    val activeTasks = viewModel.activeTasks.collectAsState()
 
     var selectedDate by remember {
         mutableStateOf(LocalDate.now())
@@ -170,11 +170,11 @@ fun HomeScreen(
                     )
                 }
 
-                if (tasks.value.isNotEmpty()) {
+                if (activeTasks.value.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(tasks.value) {
+                        items(activeTasks.value.reversed()) {
                             TaskItem(it) { item ->
                                 viewModel.updateTask(item)
                             }
@@ -253,14 +253,12 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
                 .fillMaxHeight()
                 .weight(0.2f), contentAlignment = Alignment.Center
         ) {
-
             Checkbox(checked = item.isCompleted, onCheckedChange = {
                 val updatedItem = item.copy(isCompleted = it)
                 onItemChecked(updatedItem)
             })
         }
     }
-
 
 }
 

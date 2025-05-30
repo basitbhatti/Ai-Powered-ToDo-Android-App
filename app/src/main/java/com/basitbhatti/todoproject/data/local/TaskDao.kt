@@ -15,6 +15,9 @@ interface TaskDao {
     @Query("SELECT * FROM task")
     fun getAllTasks(): Flow<List<TaskItemEntity>>
 
+    @Query("SELECT * FROM task WHERE isCompleted = 0")
+    fun getActiveTasks(): Flow<List<TaskItemEntity>>
+
     @Insert()
     suspend fun insertTask(taskItemEntity: TaskItemEntity)
 

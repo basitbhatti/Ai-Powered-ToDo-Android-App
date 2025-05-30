@@ -11,8 +11,9 @@ import javax.inject.Inject
 
 class TaskRepositoryImpl @Inject constructor(val dao: TaskDao) : TaskRepository {
 
-
     override fun getPrimaryTodoList(): Flow<List<TaskItemEntity>> = dao.getAllTasks()
+
+    override fun getActiveTodoList(): Flow<List<TaskItemEntity>> = dao.getActiveTasks()
 
     override suspend fun addTask(taskItemEntity: TaskItemEntity) = dao.insertTask(taskItemEntity)
 
