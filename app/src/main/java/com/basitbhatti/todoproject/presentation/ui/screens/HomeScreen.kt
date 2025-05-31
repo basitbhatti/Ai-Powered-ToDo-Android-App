@@ -1,5 +1,6 @@
 package com.basitbhatti.todoproject.presentation.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,6 +66,7 @@ import com.basitbhatti.todoproject.presentation.theme.primaryContainer
 import com.basitbhatti.todoproject.presentation.viewmodel.TaskViewModel
 import com.basitbhatti.todoproject.utils.PERSON_TYPE
 import com.pdftoexcel.bankstatementconverter.utils.PrefManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -123,7 +126,7 @@ fun HomeScreen(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 15.dp, vertical = 15.dp),
-            )
+        )
 
         Box(
             modifier = Modifier
@@ -207,6 +210,17 @@ fun HomeScreen(
 @Composable
 fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
 
+    val alpha = animateFloatAsState(
+        targetValue = if (item.isCompleted) 1f else 0f
+    )
+
+    val scope = rememberCoroutineScope()
+
+    var isStrikeThrough by remember {
+        mutableStateOf(item.isCompleted)
+    }
+
+
     Row(
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
@@ -215,7 +229,6 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
             .clip(RoundedCornerShape(8.dp))
             .background(lighterGray),
         verticalAlignment = Alignment.CenterVertically
-
     ) {
 
         Column(
@@ -228,6 +241,7 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
 
             Text(
                 text = item.title,
+                textDecoration = if (isStrikeThrough) TextDecoration.LineThrough else TextDecoration.None,
                 fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -239,6 +253,7 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
 
             Text(
                 text = item.description ?: "",
+                textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -254,8 +269,14 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
                 .weight(0.2f), contentAlignment = Alignment.Center
         ) {
             Checkbox(checked = item.isCompleted, onCheckedChange = {
-                val updatedItem = item.copy(isCompleted = it)
-                onItemChecked(updatedItem)
+                isStrikeThrough = it
+                scope.launch {
+                    delay(1000)
+
+                    val updatedItem = item.copy(isCompleted = it)
+                    onItemChecked(updatedItem)
+                }
+
             })
         }
     }
