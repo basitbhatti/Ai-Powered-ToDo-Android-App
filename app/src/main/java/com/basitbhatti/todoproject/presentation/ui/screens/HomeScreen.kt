@@ -56,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.basitbhatti.todoproject.domain.model.TaskItemEntity
 import com.basitbhatti.todoproject.presentation.components.dashedBorder
 import com.basitbhatti.todoproject.presentation.navigation.Screen
@@ -65,10 +68,12 @@ import com.basitbhatti.todoproject.presentation.theme.lighterGray
 import com.basitbhatti.todoproject.presentation.theme.primaryContainer
 import com.basitbhatti.todoproject.presentation.viewmodel.TaskViewModel
 import com.basitbhatti.todoproject.utils.PERSON_TYPE
+import com.basitbhatti.todoproject.worker.ReminderWorker
 import com.pdftoexcel.bankstatementconverter.utils.PrefManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,9 +100,11 @@ fun HomeScreen(
 
     val activeTasks = viewModel.activeTasks.collectAsState()
 
-    var selectedDate by remember {
-        mutableStateOf(LocalDate.now())
-    }
+    val workerRequest = PeriodicWorkRequestBuilder<ReminderWorker>(30, TimeUnit.MINUTES).build()
+    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        "TODOREMINDER",
+        ExistingPeriodicWorkPolicy.KEEP, workerRequest
+    )
 
     if (showAddTaskSheet) {
         Box(
@@ -120,7 +127,6 @@ fun HomeScreen(
             .padding(top = 30.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
-
         Text(
             "Primary Tasks",
             style = MaterialTheme.typography.titleLarge,
@@ -177,7 +183,7 @@ fun HomeScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(activeTasks.value.reversed()) {
+                        items(activeTasks.value.sortedByDescending { it.priority }) {
                             TaskItem(it) { item ->
                                 viewModel.updateTask(item)
                             }
@@ -204,6 +210,11 @@ fun HomeScreen(
         }
     }
 
+    fun getTopPriorityTask(list: List<TaskItemEntity>): TaskItemEntity? {
+        return list.sortedByDescending { it.priority }
+            .firstOrNull()
+    }
+
 }
 
 
@@ -219,7 +230,6 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
     var isStrikeThrough by remember {
         mutableStateOf(item.isCompleted)
     }
-
 
     Row(
         modifier = Modifier
@@ -276,7 +286,6 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
                     val updatedItem = item.copy(isCompleted = it)
                     onItemChecked(updatedItem)
                 }
-
             })
         }
     }
