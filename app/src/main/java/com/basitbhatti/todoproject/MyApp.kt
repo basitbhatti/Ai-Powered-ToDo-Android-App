@@ -15,16 +15,16 @@ class MyApp : Application() {
         createNotificationChannel()
     }
 
-    private fun createNotificationChannel() {
-        val channelName = "Reminder Channel"
-        val descriptionText = "This channel is to remind users about the high priority tasks."
+
+    fun createNotificationChannel() {
+        val name = "Reminder Channel"
+        val descriptionText = "This channel sends task reminder notification."
         val importance = NotificationManager.IMPORTANCE_HIGH
 
-        val channel = NotificationChannel(REMINDER_CHANNEL_ID, channelName, importance).apply {
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(REMINDER_CHANNEL_ID, name, importance).apply {
             description = descriptionText
         }
-
-        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
     }
 

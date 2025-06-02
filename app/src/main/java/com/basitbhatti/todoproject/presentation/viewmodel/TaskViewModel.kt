@@ -1,29 +1,40 @@
 package com.basitbhatti.todoproject.presentation.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.basitbhatti.todoproject.domain.model.TaskItemEntity
 import com.basitbhatti.todoproject.domain.use_cases.AddTaskUseCase
 import com.basitbhatti.todoproject.domain.use_cases.DeleteTaskUseCase
 import com.basitbhatti.todoproject.domain.use_cases.EditTaskUseCase
 import com.basitbhatti.todoproject.domain.use_cases.ObserveActiveTasksUseCase
 import com.basitbhatti.todoproject.domain.use_cases.ObserveAllTasksUseCase
+import com.basitbhatti.todoproject.utils.TASK_ID
+import com.basitbhatti.todoproject.utils.TASK_TITLE
+import com.basitbhatti.todoproject.worker.ReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val getAllTasksUseCase: ObserveAllTasksUseCase,
     private val getActiveTasksUseCase: ObserveActiveTasksUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val deleteTaskRepository: DeleteTaskUseCase,
     private val editTaskUseCase: EditTaskUseCase,
-) : ViewModel(){
+) : ViewModel() {
 
     private var _tasks = MutableStateFlow<List<TaskItemEntity>>(emptyList())
     val tasks = _tasks.asStateFlow()
@@ -37,9 +48,33 @@ class TaskViewModel @Inject constructor(
         fetchAllTasks()
     }
 
+    fun sendTopPriorityReminder() {
+        val topPriorityTask = _activeTasks?.value?.maxByOrNull { it.priority }
+        if (topPriorityTask != null) {
+
+            val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(
+                30, TimeUnit.MINUTES
+            ).addTag("${topPriorityTask.id}")
+
+            workRequest.setInputData(
+                workDataOf(
+                    TASK_ID to topPriorityTask.id,
+                    TASK_TITLE to topPriorityTask.title
+                )
+            )
+
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                topPriorityTask.title,
+                ExistingPeriodicWorkPolicy.KEEP,
+                workRequest.build()
+            )
+
+        }
+    }
+
     fun fetchAllTasks() {
         viewModelScope.launch(Dispatchers.IO) {
-            getActiveTasksUseCase().collect{
+            getActiveTasksUseCase().collect {
                 _activeTasks.value = it
             }
             getAllTasksUseCase().collect {

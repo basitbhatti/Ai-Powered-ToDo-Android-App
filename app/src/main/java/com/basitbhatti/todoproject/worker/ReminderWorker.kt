@@ -5,36 +5,34 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import androidx.core.app.NotificationCompat
-import androidx.core.content.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.basitbhatti.todoproject.R
 import com.basitbhatti.todoproject.REMINDER_CHANNEL_ID
-import com.basitbhatti.todoproject.domain.model.TaskItemEntity
+import com.basitbhatti.todoproject.utils.TASK_ID
+import com.basitbhatti.todoproject.utils.TASK_TITLE
 
-class ReminderWorker(context: Context, params: WorkerParameters) :
-    Worker(context, params) {
-
+class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
-        task?.let {
-            sendNotification(task)
+        val id = inputData.getInt(TASK_ID, -1)
+        val title = inputData.getString(TASK_TITLE)
+        if (id != -1) {
+            showNotification(id, title)
         }
+
         return Result.success()
     }
 
-    private fun sendNotification(task: TaskItemEntity?) {
-        val manager = applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
+    fun showNotification(id: Int, title: String?) {
         val builder = NotificationCompat.Builder(applicationContext, REMINDER_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(task?.title)
-            .setContentText("Working on this high-priority task?")
-            .setPriority(Notification.PRIORITY_HIGH)
+            .setContentTitle("Eating your frog?")
+            .setContentText(title ?: "Don't forget to mark it as completed.")
+            .setPriority(Notification.PRIORITY_MAX)
 
-        manager.notify(task?.id?:1, builder.build())
-
-
-
+        val manager =
+            applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(id, builder.build())
     }
 
 }

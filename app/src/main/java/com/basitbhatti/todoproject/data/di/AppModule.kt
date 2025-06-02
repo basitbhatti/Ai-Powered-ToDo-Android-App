@@ -1,5 +1,6 @@
 package com.basitbhatti.todoproject.data.di
 
+import android.app.Application
 import android.content.Context
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -22,6 +23,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideContext(application: Application): Context{
+        return application.applicationContext
+    }
 
     @Provides
     @Singleton

@@ -35,6 +35,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,9 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.basitbhatti.todoproject.domain.model.TaskItemEntity
 import com.basitbhatti.todoproject.presentation.components.dashedBorder
 import com.basitbhatti.todoproject.presentation.navigation.Screen
@@ -68,14 +66,11 @@ import com.basitbhatti.todoproject.presentation.theme.lighterGray
 import com.basitbhatti.todoproject.presentation.theme.primaryContainer
 import com.basitbhatti.todoproject.presentation.viewmodel.TaskViewModel
 import com.basitbhatti.todoproject.utils.PERSON_TYPE
-import com.basitbhatti.todoproject.worker.ReminderWorker
 import com.pdftoexcel.bankstatementconverter.utils.PrefManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: TaskViewModel = hiltViewModel(), controller: NavHostController
@@ -100,11 +95,11 @@ fun HomeScreen(
 
     val activeTasks = viewModel.activeTasks.collectAsState()
 
-    val workerRequest = PeriodicWorkRequestBuilder<ReminderWorker>(30, TimeUnit.MINUTES).build()
-    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-        "TODOREMINDER",
-        ExistingPeriodicWorkPolicy.KEEP, workerRequest
-    )
+    LaunchedEffect(
+        activeTasks
+    ) {
+        viewModel.sendTopPriorityReminder()
+    }
 
     if (showAddTaskSheet) {
         Box(
@@ -209,12 +204,6 @@ fun HomeScreen(
             }
         }
     }
-
-    fun getTopPriorityTask(list: List<TaskItemEntity>): TaskItemEntity? {
-        return list.sortedByDescending { it.priority }
-            .firstOrNull()
-    }
-
 }
 
 
