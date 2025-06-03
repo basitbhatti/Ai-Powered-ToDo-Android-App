@@ -16,7 +16,7 @@ import com.basitbhatti.todoproject.domain.use_cases.ObserveActiveTasksUseCase
 import com.basitbhatti.todoproject.domain.use_cases.ObserveAllTasksUseCase
 import com.basitbhatti.todoproject.utils.TASK_ID
 import com.basitbhatti.todoproject.utils.TASK_TITLE
-import com.basitbhatti.todoproject.worker.ReminderWorker
+import com.basitbhatti.todoproject.utils.worker.ReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

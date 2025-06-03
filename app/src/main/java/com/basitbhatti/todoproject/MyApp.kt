@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import dagger.hilt.android.HiltAndroidApp
 
 const val REMINDER_CHANNEL_ID = "REMINDER_CHANNEL"
+const val DAILY_REMINDER_CHANNEL = "DAILY_REMINDER_CHANNEL"
 
 @HiltAndroidApp
 class MyApp : Application() {
@@ -26,6 +27,13 @@ class MyApp : Application() {
             description = descriptionText
         }
         manager.createNotificationChannel(channel)
+        manager.createNotificationChannel(
+            NotificationChannel(
+                DAILY_REMINDER_CHANNEL,
+                "Daily Reminder Channel",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+        )
     }
 
 

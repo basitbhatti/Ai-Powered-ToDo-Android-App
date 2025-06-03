@@ -50,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.basitbhatti.todoproject.MainActivity.Companion.setReminder
 import com.basitbhatti.todoproject.domain.model.TaskItemEntity
 import com.basitbhatti.todoproject.presentation.components.dashedBorder
 import com.basitbhatti.todoproject.presentation.navigation.Screen
@@ -85,23 +85,23 @@ fun HomeScreen(
         mutableStateOf(false)
     }
 
-    if (!LocalInspectionMode.current) {
-        if (prefManager.getString(PERSON_TYPE).isBlank()) {
-            controller.navigate(Screen.UserType.route) {
-                popUpTo(Screen.Home.route) {
-                    inclusive = true
-                }
+    if (prefManager.getString(PERSON_TYPE).isBlank()) {
+        controller.navigate(Screen.UserType.route) {
+            popUpTo(Screen.Home.route) {
+                inclusive = true
             }
         }
+    } else {
+        setReminder(context)
     }
 
     val activeTasks = viewModel.activeTasks.collectAsState()
 
     LaunchedEffect(Unit) {
         snapshotFlow { activeTasks.value }.collect {
-                Log.d("TAGSCHEDULE", "sendTopPriorityReminder LaunchedEffect")
-                viewModel.sendTopPriorityReminder()
-            }
+            Log.d("TAGSCHEDULE", "sendTopPriorityReminder LaunchedEffect")
+            viewModel.sendTopPriorityReminder()
+        }
     }
 
     if (showAddTaskSheet) {
@@ -179,7 +179,9 @@ fun HomeScreen(
 
                 if (activeTasks.value.isNotEmpty()) {
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp)
                     ) {
                         items(activeTasks.value.sortedByDescending { it.priority }) {
                             TaskItem(it) { item ->
