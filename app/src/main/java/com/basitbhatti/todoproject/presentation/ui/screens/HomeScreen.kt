@@ -1,6 +1,5 @@
 package com.basitbhatti.todoproject.presentation.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -210,10 +210,6 @@ fun HomeScreen(
 @Composable
 fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
 
-    val alpha = animateFloatAsState(
-        targetValue = if (item.isCompleted) 1f else 0f
-    )
-
     val scope = rememberCoroutineScope()
 
     var isStrikeThrough by remember {
@@ -284,19 +280,7 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
 @Preview
 @Composable
 private fun Preview() {
-    TaskItem(
-        TaskItemEntity(
-            id = 0,
-            title = "Title of the task.",
-            description = "A short description of the task showing here.",
-            dueDay = LocalDate.now(),
-            isCompleted = false,
-            priority = 1
-        ),
-        { item ->
 
-        }
-    )
 }
 
 
@@ -311,7 +295,7 @@ fun AddTaskBottomSheet(
         mutableStateOf(true)
     }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     var title by remember {
@@ -320,6 +304,11 @@ fun AddTaskBottomSheet(
 
     var description by remember {
         mutableStateOf("")
+    }
+
+    val items = listOf("Normal", "Medium", "High")
+    var selectedIndex by remember {
+        mutableIntStateOf(0)
     }
 
     ModalBottomSheet(
@@ -408,6 +397,39 @@ fun AddTaskBottomSheet(
                     unfocusedIndicatorColor = Color.Transparent
                 )
                 )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 7.5.dp, end = 7.5.dp, top = 15.dp)
+                    .height(40.dp)
+            ) {
+
+                items.forEachIndexed { index, text ->
+
+                    Box(modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .padding(horizontal = 7.5.dp)
+                        .clickable {
+                            selectedIndex = index
+                        }
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (selectedIndex == index) Color.LightGray else lighterGray),
+                        contentAlignment = Alignment.Center) {
+                        Text(
+                            text = text, color = if (index == selectedIndex) {
+                                Color.Black
+                            } else {
+                                Color.Gray
+                            }
+                        )
+                    }
+
+
+                }
+
             }
 
             Row(
