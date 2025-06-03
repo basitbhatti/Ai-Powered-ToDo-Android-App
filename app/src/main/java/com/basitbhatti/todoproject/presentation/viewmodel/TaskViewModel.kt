@@ -52,6 +52,8 @@ class TaskViewModel @Inject constructor(
         val topPriorityTask = _activeTasks?.value?.maxByOrNull { it.priority }
         if (topPriorityTask != null) {
 
+            Log.d("TAGSCHEDULE", "sendTopPriorityReminder Priority: ${topPriorityTask.priority}")
+
             val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(
                 30, TimeUnit.MINUTES
             ).addTag("${topPriorityTask.id}")
@@ -64,30 +66,33 @@ class TaskViewModel @Inject constructor(
             )
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                topPriorityTask.title,
-                ExistingPeriodicWorkPolicy.KEEP,
+                "top_priority_reminder",
+                ExistingPeriodicWorkPolicy.UPDATE,
                 workRequest.build()
             )
-
         }
     }
 
     fun fetchAllTasks() {
+
         viewModelScope.launch(Dispatchers.IO) {
             getActiveTasksUseCase().collect {
                 _activeTasks.value = it
+                _activeTasks.value.forEach {
+                    Log.d("TAGSCHEDULE", "active : ${it.title}")
+                }
+
             }
             getAllTasksUseCase().collect {
                 _tasks.value = it
                 it.forEach {
-                    Log.d("TAGTASK", "fetching : ${it.title}")
                 }
             }
         }
     }
 
     fun addTask(task: TaskItemEntity) {
-        Log.d("TAGTASK", "addTask: ")
+        Log.d("TAGSCHEDULE", "adding : ${task.title}")
         viewModelScope.launch(Dispatchers.IO) {
             addTaskUseCase(task)
             fetchAllTasks()
@@ -98,7 +103,6 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             editTaskUseCase(task)
             fetchAllTasks()
-
         }
     }
 

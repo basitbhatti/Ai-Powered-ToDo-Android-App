@@ -1,10 +1,10 @@
 package com.basitbhatti.todoproject.worker
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.PRIORITY_MAX
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.basitbhatti.todoproject.R
@@ -28,7 +28,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Eating your frog?")
             .setContentText(title ?: "Don't forget to mark it as completed.")
-            .setPriority(Notification.PRIORITY_MAX)
+            .setPriority(PRIORITY_MAX)
 
         val manager =
             applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager

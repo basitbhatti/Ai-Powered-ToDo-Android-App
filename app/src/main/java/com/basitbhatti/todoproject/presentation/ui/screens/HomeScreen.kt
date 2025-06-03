@@ -1,5 +1,6 @@
 package com.basitbhatti.todoproject.presentation.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,10 +97,11 @@ fun HomeScreen(
 
     val activeTasks = viewModel.activeTasks.collectAsState()
 
-    LaunchedEffect(
-        activeTasks
-    ) {
-        viewModel.sendTopPriorityReminder()
+    LaunchedEffect(Unit) {
+        snapshotFlow { activeTasks.value }.collect {
+                Log.d("TAGSCHEDULE", "sendTopPriorityReminder LaunchedEffect")
+                viewModel.sendTopPriorityReminder()
+            }
     }
 
     if (showAddTaskSheet) {
@@ -176,7 +179,7 @@ fun HomeScreen(
 
                 if (activeTasks.value.isNotEmpty()) {
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
                     ) {
                         items(activeTasks.value.sortedByDescending { it.priority }) {
                             TaskItem(it) { item ->
@@ -213,7 +216,7 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
     val scope = rememberCoroutineScope()
 
     var isStrikeThrough by remember {
-        mutableStateOf(item.isCompleted)
+        mutableStateOf(false)
     }
 
     Row(
@@ -263,7 +266,7 @@ fun TaskItem(item: TaskItemEntity, onItemChecked: (TaskItemEntity) -> Unit) {
                 .fillMaxHeight()
                 .weight(0.2f), contentAlignment = Alignment.Center
         ) {
-            Checkbox(checked = item.isCompleted, onCheckedChange = {
+            Checkbox(checked = isStrikeThrough, onCheckedChange = {
                 isStrikeThrough = it
                 scope.launch {
                     delay(1000)
@@ -546,7 +549,7 @@ fun AddTaskBottomSheet(
                             LocalDate.now().plusDays(1)
                         },
                         isCompleted = false,
-                        priority = 1
+                        priority = selectedIndex + 1
                     )
                     onTaskAdded(task)
                 }) {
