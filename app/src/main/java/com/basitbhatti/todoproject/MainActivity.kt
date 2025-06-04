@@ -58,35 +58,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         @SuppressLint("ScheduleExactAlarm")
         fun setReminder(context: Context) {
-            val pref = PrefManager(context)
-            val hour = pref.getInt(REMINDER_HOUR)
-            val minute = pref.getInt(REMINDER_MINUTE)
-
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, ReminderBroadcastReceiver::class.java)
-            val pendingIntend = PendingIntent.getActivity(
-                context,
-                202,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val calendar = Calendar.getInstance().apply {
-                timeInMillis = System.currentTimeMillis()
-                set(Calendar.HOUR_OF_DAY, hour)
-                set(Calendar.MINUTE, minute)
-                set(Calendar.SECOND, 0)
-
-                if (timeInMillis <= System.currentTimeMillis()) {
-                    add(Calendar.DAY_OF_YEAR, 1)
-                }
-            }
-
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntend
-            )
 
 
 
